@@ -1,4 +1,4 @@
-const LOAI_XUATSAC = 'xuat-sac';
+const LOAI_XUATSAC = 'xuat-ssac';
 const LOAI_GIOI = 'gioi';
 const LOAI_KHA = 'kha';
 const LOAI_TB = 'trung-binh';

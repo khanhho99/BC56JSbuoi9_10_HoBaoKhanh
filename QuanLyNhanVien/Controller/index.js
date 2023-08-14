@@ -15,10 +15,8 @@ window.onload = function () {
 document.querySelector('#btnThemNV').onclick = function () {
     var nv = new NhanVien();
     getFormData(nv);
-    // nv.getGeneralSalary();
-    // nv.ranking();
 
-    //validate
+    //validation
     var valid = handleValidate(nv);
 
     if (!valid) {
@@ -26,7 +24,8 @@ document.querySelector('#btnThemNV').onclick = function () {
     }
 
     if (isExist(nv.username)) {
-        alert("Người dùng đã tồn tại");
+        //bat ra modal
+        alert("Username đã tồn tại");
         return;
     }
 
@@ -48,7 +47,7 @@ function renderTable(arr) {
                 <td>${arrItem.fullName}</td>
                 <td>${arrItem.email}</td>
                 <td>${arrItem.dateStart}</td>
-                <td>${arrItem.position}</td>
+                <td>${arrItem.duty}</td>
                 <td>${arrItem.generalSalary}</td>
                 <td>${arrItem.employeeType}</td>
                 <td>
@@ -76,11 +75,11 @@ function deleteItem(id) {
     saveToLocal(employeeArray);
 }
 
-//Cập nhật
+//cap nhat
 document.querySelector('#btnCapNhat').onclick = function () {
     var upUsername = getElement('#tknv').value;
     if (!isExist(upUsername)) {
-        alert("Người dùng không tồn tại");
+        alert("Username không tồn tại");
         return;
     }
     var indexUpdate = 0;
@@ -90,82 +89,110 @@ document.querySelector('#btnCapNhat').onclick = function () {
             break;
         }
     }
+    var temp = new NhanVien();
+    passData(temp, employeeArray[indexUpdate]);
 
-    /**
-     * Hàm validation đối tượng
-     * @param {*} obj nhận vào 1 đối tượng nhân viên
-     * @returns true hoặc false
-     */
-    function handleValidate(obj) {
-        var validation = new Validation();
-
-        //username
-        var valid = validation.isntNull('username', obj.username)
-            & validation.validLength('username', obj.username)
-
-        //fullname
-        valid &= validation.isntNull('fullName', obj.fullName)
-            & validation.isLetter('fullName', obj.fullName)
-
-        //email
-        valid &= validation.isntNull("email", obj.email)
-            & validation.validEmail('email', obj.email)
-
-        //password
-        valid &= validation.isntNull("password", obj.password)
-            & validation.validPassword("password", obj.password)
-
-        //date
-        valid &= validation.isntNull("date", obj.dateStart)
-
-        //salary
-        valid &= validation.isntNull("sdSalary", obj.standardSalary)
-            & validation.validSalary("sdSalary", obj.standardSalary)
-
-        //position
-        valid &= validation.validPosition("chucvu", obj.position)
-
-        //workingHours
-        valid &= validation.isntNull("gioLam", obj.workingHours)
-            & validation.validWorkingTime("gioLam", obj.workingHours)
-
-        return valid;
+    getFormData(temp);
+    console.log("temp", temp);
+    console.log(employeeArray[indexUpdate])
+    var valid = handleValidate(temp);
+    if (!valid) {
+        return;
     }
+    getFormData(temp)
+    passData(employeeArray[indexUpdate], temp);
+    renderTable(employeeArray);
+    saveToLocal(employeeArray);
+}
 
-    function getFormData(obj) {
-        obj.username = getElement('#tknv').value;
-        obj.fullName = getElement('#name').value;
-        obj.email = getElement('#email').value;
-        obj.password = getElement('#password').value;
-        obj.dateStart = getElement('#datepicker').value;
-        obj.standardSalary = getElement('#luongCB').value * 1;
-        obj.position = getElement('#chucvu').value;
-        obj.workingHours = getElement('#gioLam').value * 1;
-        obj.ranking();
-        obj.getGeneralSalary();
-    }
+/**
+ * Hàm validation đối tượng
+ * @param {*} obj nhận vào 1 đối tượng nhân viên
+ * @returns true hoặc false
+ */
+function handleValidate(obj) {
+    var validation = new Validation();
 
-    /**
-     * @param {*} objA đối tượng nhận dữ liệu
-     * @param {*} objB đối tượng tham chiếu
-     */
-    function passData(objA, objB) {
-        objA.username = objB.username;
-        objA.fullName = objB.fullName;
-        objA.password = objB.password;
-        objA.email = objB.email;
-        objA.dateStart = objB.dateStart;
-        objA.standardSalary = objB.standardSalary;
-        objA.workingHours = objB.workingHours;
-        objA.position = objB.position;
-        objA.generalSalary = objB.generalSalary;
-        objA.employeeType = objB.employeeType;
-        objA.loaiNV = objB.loaiNV;
-    }
+    //username
+    var valid = validation.isntNull('Username', obj.username)
+        & validation.validLength('Username', obj.username)
 
-    function isExist(username) {
-        return result = employeeArray.some(function (item, index) {
-            return item.username == username;
-        })
+    //fullname
+    valid &= validation.isntNull('Họ và Tên', obj.fullName)
+        & validation.isLetter('Họ và Tên', obj.fullName)
+
+    //email
+    valid &= validation.isntNull("Email", obj.email)
+        & validation.validEmail('Email', obj.email)
+
+    //password
+    valid &= validation.isntNull("Password", obj.password)
+        & validation.validPassword("Password", obj.password)
+
+    //date
+    valid &= validation.isntNull("date", obj.dateStart)
+
+    //salary
+    valid &= validation.isntNull("Salary", obj.standardSalary)
+        & validation.validSalary("Salary", obj.standardSalary)
+
+    //duty
+    valid &= validation.validDuty("Chức vụ", obj.duty)
+
+    //workingHours
+    valid &= validation.isntNull("Giờ làm", obj.workingHours)
+        & validation.validWorkingTime("Giờ làm", obj.workingHours)
+
+    return valid;
+}
+
+function getFormData(obj) {
+    obj.username = getElement('#tknv').value;
+    obj.fullName = getElement('#name').value;
+    obj.email = getElement('#email').value;
+    obj.password = getElement('#password').value;
+    obj.dateStart = getElement('#datepicker').value;
+    obj.standardSalary = getElement('#luongCB').value * 1;
+    obj.duty = getElement('#chucvu').value;
+    obj.workingHours = getElement('#gioLam').value * 1;
+    obj.ranking();
+    obj.getGeneralSalary();
+}
+
+/**
+ * @param {*} objA đối tượng nhận dữ liệu
+ * @param {*} objB đối tượng được tham chiếu
+ */
+function passData(objA, objB) {
+    objA.username = objB.username;
+    objA.fullName = objB.fullName;
+    objA.password = objB.password;
+    objA.email = objB.email;
+    objA.dateStart = objB.dateStart;
+    objA.standardSalary = objB.standardSalary;
+    objA.workingHours = objB.workingHours;
+    objA.duty = objB.duty;
+    objA.generalSalary = objB.generalSalary;
+    objA.employeeType = objB.employeeType;
+    objA.loaiNV = objB.loaiNV;
+}
+
+function isExist(username) {
+    return result = employeeArray.some(function (item, index) {
+        return item.username == username;
+    })
+}
+
+//Search
+document.querySelector('#searchName').oninput = function () {
+    var finding = document.querySelector('#searchName').value;
+    finding = stringToSlug(finding);
+    var newArr = [];
+    for (var i = 0; i < employeeArray.length; i++) {
+        var item = stringToSlug(employeeArray[i].loaiNV);
+        if (item.search(finding) != -1) {
+            newArr.push(employeeArray[i]);
+        }
     }
+    renderTable(newArr);
 }
